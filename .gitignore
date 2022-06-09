@@ -1,0 +1,6 @@
+.*
+!.gitignore
+
+# IDE
+.idea
+*.iml
