@@ -4,3 +4,12 @@
 # IDE
 .idea
 *.iml
+
+# Python Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python Distribution / packaging
+dist/
+*.egg-info/
