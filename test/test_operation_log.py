@@ -1,7 +1,8 @@
 import ipaddress
+import time
 import unittest
 
-from src.operation_log.operation_log import Operator
+from src.operation_log.operation_log import Operator, OperationLog
 
 
 class OperatorTestCase(unittest.TestCase):
@@ -18,6 +19,7 @@ class OperatorTestCase(unittest.TestCase):
                 expect_operator['name'],
                 expect_operator['ip']
             )
+
             self.assertEqual(actual_operator.id, expect_operator['id'])
             self.assertEqual(actual_operator.name, expect_operator['name'])
             self.assertEqual(actual_operator.ip, expect_operator['ip'] if expect_operator['ip'] else '')
@@ -31,6 +33,33 @@ class OperatorTestCase(unittest.TestCase):
                 expect_operator['name'],
                 expect_operator['ip']
             )
+
+
+class OperatorLogTestCase(unittest.TestCase):
+    def test_init_normal(self):
+        expect_operation_logs = [
+            {'operator': Operator(1, 'test'), 'text': '测试', 'category': 1},
+            {'operator': Operator(1, 'test'), 'text': '测试', 'category': None},
+        ]
+
+        for expect_operation_log in expect_operation_logs:
+            start_timestamp = int(time.time())
+
+            actual_operation_log = OperationLog(
+                expect_operation_log['operator'],
+                expect_operation_log['text'],
+                expect_operation_log['category']
+            )
+
+            end_timestamp = int(time.time())
+
+            self.assertEqual(actual_operation_log.operator, expect_operation_log['operator'])
+            self.assertEqual(actual_operation_log.text, expect_operation_log['text'])
+            self.assertEqual(
+                actual_operation_log.category,
+                expect_operation_log['category'] if expect_operation_log['category'] else 0
+            )
+            self.assertTrue(start_timestamp <= actual_operation_log.timestamp <= end_timestamp)
 
 
 if __name__ == '__main__':
