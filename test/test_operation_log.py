@@ -1,7 +1,7 @@
 import time
 import unittest
 
-from src.operation_log.operation_log import Operator, OperationLog, DefaultOperationLogWriter
+from src.operation_log.operation_log import Operator, OperationLog, DefaultOperationLogWriter, OperationFailedError
 
 
 class OperatorTestCase(unittest.TestCase):
@@ -62,7 +62,7 @@ class OperatorLogTestCase(unittest.TestCase):
 
 
 class DefaultOperationLogWriterTestCase(unittest.TestCase):
-    def test_write_log_normal(self):
+    def test_write_normal(self):
         expect_operation_log = OperationLog(Operator(1, 'test', '127.0.0.1'), 'test text', 1)
 
         writer = DefaultOperationLogWriter()
@@ -81,6 +81,16 @@ class DefaultOperationLogWriterTestCase(unittest.TestCase):
                 f'timestamp {expect_operation_log.timestamp}'
             ]
         )
+
+
+class OperationFailedErrorTestCase(unittest.TestCase):
+    def test_init_normal(self):
+        expect_reason = 'operation failed'
+
+        actual_error = OperationFailedError(expect_reason)
+
+        self.assertIsInstance(actual_error, Exception)
+        self.assertEqual(actual_error.reason, expect_reason)
 
 
 if __name__ == '__main__':
