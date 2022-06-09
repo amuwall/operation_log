@@ -1,8 +1,7 @@
-import ipaddress
 import time
 import unittest
 
-from src.operation_log.operation_log import Operator, OperationLog
+from src.operation_log.operation_log import Operator, OperationLog, DefaultOperationLogWriter
 
 
 class OperatorTestCase(unittest.TestCase):
@@ -60,6 +59,28 @@ class OperatorLogTestCase(unittest.TestCase):
                 expect_operation_log['category'] if expect_operation_log['category'] else 0
             )
             self.assertTrue(start_timestamp <= actual_operation_log.timestamp <= end_timestamp)
+
+
+class DefaultOperationLogWriterTestCase(unittest.TestCase):
+    def test_write_log_normal(self):
+        expect_operation_log = OperationLog(Operator(1, 'test', '127.0.0.1'), 'test text', 1)
+
+        writer = DefaultOperationLogWriter()
+        with self.assertLogs() as logs:
+            writer.write(expect_operation_log)
+
+        self.assertEqual(
+            logs.output,
+            [
+                'INFO:root:'
+                f'operator id {expect_operation_log.operator.id} '
+                f'operator name {expect_operation_log.operator.name} '
+                f'operator ip {expect_operation_log.operator.ip} '
+                f'category {expect_operation_log.category} '
+                f'text {expect_operation_log.text} '
+                f'timestamp {expect_operation_log.timestamp}'
+            ]
+        )
 
 
 if __name__ == '__main__':
