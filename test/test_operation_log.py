@@ -96,18 +96,18 @@ class OperationFailedErrorTestCase(unittest.TestCase):
         self.assertEqual(actual_error.reason, expect_reason)
 
 
-class RecordOperationLogTestCase(unittest.TestCase):
+class RecordOperationLogTestCase(unittest.IsolatedAsyncioTestCase):
     @staticmethod
     def get_test_operator() -> Operator:
         return Operator(1, 'test', '127.0.0.1')
 
-    def test_record_success_log(self):
+    async def test_record_success_log(self):
         @record_operation_log(self.get_test_operator, 'test op')
-        def test_func():
+        async def test_func():
             logging.info('test_record_success_log')
 
         with self.assertLogs() as logs:
-            test_func()
+            await test_func()
 
         test_operator = self.get_test_operator()
 
@@ -124,30 +124,7 @@ class RecordOperationLogTestCase(unittest.TestCase):
             logs.output[1]
         )
 
-    def test_record_success_log_with_context(self):
-        @record_operation_log(self.get_test_operator, 'test op {msg}', context={'msg': 'hello world'})
-        def test_func():
-            logging.info('test_record_success_log_with_context')
-
-        with self.assertLogs() as logs:
-            test_func()
-
-        test_operator = self.get_test_operator()
-
-        self.assertEqual(len(logs.output), 2)
-        self.assertEqual(logs.output[0], 'INFO:root:test_record_success_log_with_context')
-        self.assertIn(
-            'INFO:root:'
-            f'operator id {test_operator.id} '
-            f'operator name {test_operator.name} '
-            f'operator ip {test_operator.ip} '
-            'category 0 '
-            f'text test op hello world '
-            f'timestamp ',
-            logs.output[1]
-        )
-
-    def test_record_success_log_with_execute_context(self):
+    async def test_record_success_log_with_context(self):
         def before_execute_context() -> typing.Dict:
             return {'old_msg': 'hello old world'}
 
@@ -160,16 +137,16 @@ class RecordOperationLogTestCase(unittest.TestCase):
             before_execute_contexts=[before_execute_context],
             after_execute_contexts=[after_execute_context]
         )
-        def test_func():
-            logging.info('test_record_success_log_with_execute_context')
+        async def test_func():
+            logging.info('test_record_success_log_with_context')
 
         with self.assertLogs() as logs:
-            test_func()
+            await test_func()
 
         test_operator = self.get_test_operator()
 
         self.assertEqual(len(logs.output), 2)
-        self.assertEqual(logs.output[0], 'INFO:root:test_record_success_log_with_execute_context')
+        self.assertEqual(logs.output[0], 'INFO:root:test_record_success_log_with_context')
         self.assertIn(
             'INFO:root:'
             f'operator id {test_operator.id} '
@@ -181,14 +158,14 @@ class RecordOperationLogTestCase(unittest.TestCase):
             logs.output[1]
         )
 
-    def test_record_failed_log(self):
+    async def test_record_failed_log(self):
         @record_operation_log(self.get_test_operator, 'test success op', fail_text='test failed op')
-        def test_func():
+        async def test_func():
             logging.info('test_record_failed_log')
             raise OperationFailedError('test failed reason')
 
         with self.assertLogs() as logs:
-            test_func()
+            await test_func()
 
         test_operator = self.get_test_operator()
 
@@ -205,36 +182,7 @@ class RecordOperationLogTestCase(unittest.TestCase):
             logs.output[1]
         )
 
-    def test_record_failed_log_with_context(self):
-        @record_operation_log(
-            self.get_test_operator,
-            'test op {msg}',
-            fail_text='test failed op {msg} {failed_reason}',
-            context={'msg': 'hello world'}
-        )
-        def test_func():
-            logging.info('test_record_failed_log_with_context')
-            raise OperationFailedError('test failed reason')
-
-        with self.assertLogs() as logs:
-            test_func()
-
-        test_operator = self.get_test_operator()
-
-        self.assertEqual(len(logs.output), 2)
-        self.assertEqual(logs.output[0], 'INFO:root:test_record_failed_log_with_context')
-        self.assertIn(
-            'INFO:root:'
-            f'operator id {test_operator.id} '
-            f'operator name {test_operator.name} '
-            f'operator ip {test_operator.ip} '
-            'category 0 '
-            f'text test failed op hello world test failed reason '
-            f'timestamp ',
-            logs.output[1]
-        )
-
-    def test_record_failed_log_with_execute_context(self):
+    async def test_record_failed_log_with_context(self):
         def before_execute_context() -> typing.Dict:
             return {'old_msg': 'hello old world'}
 
@@ -248,17 +196,17 @@ class RecordOperationLogTestCase(unittest.TestCase):
             before_execute_contexts=[before_execute_context],
             after_execute_contexts=[after_execute_context]
         )
-        def test_func():
-            logging.info('test_record_failed_log_with_execute_context')
+        async def test_func():
+            logging.info('test_record_failed_log_with_context')
             raise OperationFailedError('test failed reason')
 
         with self.assertLogs() as logs:
-            test_func()
+            await test_func()
 
         test_operator = self.get_test_operator()
 
         self.assertEqual(len(logs.output), 2)
-        self.assertEqual(logs.output[0], 'INFO:root:test_record_failed_log_with_execute_context')
+        self.assertEqual(logs.output[0], 'INFO:root:test_record_failed_log_with_context')
         self.assertIn(
             'INFO:root:'
             f'operator id {test_operator.id} '
@@ -270,14 +218,14 @@ class RecordOperationLogTestCase(unittest.TestCase):
             logs.output[1]
         )
 
-    def test_record_failed_log_without_failed_text(self):
+    async def test_record_failed_log_without_failed_text(self):
         @record_operation_log(self.get_test_operator, 'test op')
-        def test_func():
+        async def test_func():
             logging.info('test_record_failed_log_without_failed_text')
             raise OperationFailedError('test failed reason')
 
         with self.assertLogs() as logs:
-            test_func()
+            await test_func()
 
         test_operator = self.get_test_operator()
 
@@ -294,7 +242,7 @@ class RecordOperationLogTestCase(unittest.TestCase):
             logs.output[1]
         )
 
-    def test_record_log_with_custom_writer(self):
+    async def test_record_log_with_custom_writer(self):
         class TestOperationLogWriter(OperationLogWriter):
             def write(self, operation_log: OperationLog):
                 logging.info(f'this is custom log writer {operation_log.text}')
@@ -306,11 +254,11 @@ class RecordOperationLogTestCase(unittest.TestCase):
             'test op',
             writer=test_custom_writer
         )
-        def test_func():
+        async def test_func():
             logging.info('test_record_log_with_custom_writer')
 
         with self.assertLogs() as logs:
-            test_func()
+            await test_func()
 
         self.assertEqual(len(logs.output), 2)
         self.assertEqual(logs.output[0], 'INFO:root:test_record_log_with_custom_writer')

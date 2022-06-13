@@ -55,22 +55,23 @@ class OperationFailedError(Exception):
 
 
 def record_operation_log(
-        get_operator: typing.Callable[[...], Operator],
+        get_operator: typing.Callable[..., Operator],
         success_text: str,
         fail_text: typing.Optional[str] = None,
         category: typing.Optional[int] = None,
-        context: typing.Optional[typing.Dict] = None,
-        before_execute_contexts: typing.Optional[typing.List[typing.Callable[[...], typing.Dict]]] = None,
-        after_execute_contexts: typing.Optional[typing.List[typing.Callable[[...], typing.Dict]]] = None,
+        before_execute_contexts: typing.Optional[typing.List[typing.Callable[..., typing.Dict]]] = None,
+        after_execute_contexts: typing.Optional[typing.List[typing.Callable[..., typing.Dict]]] = None,
         writer: typing.Optional[OperationLogWriter] = None,
 ) -> typing.Callable:
-    context = context if context else {}
     writer = writer if writer else DefaultOperationLogWriter()
 
-    def decorator(func) -> typing.Callable:
+    def decorator(func: typing.Callable[..., typing.Awaitable]) -> typing.Callable[..., typing.Awaitable]:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> typing.Any:
-            success = True
+        async def wrapper(*args, **kwargs) -> typing.Any:
+            context = {
+                'execute_success': True,
+                'failed_reason': ''
+            }
 
             operator = get_operator(*args, **kwargs)
 
@@ -80,16 +81,17 @@ def record_operation_log(
 
             result = None
             try:
-                result = func(*args, **kwargs)
+                result = await func(*args, **kwargs)
             except OperationFailedError as err:
-                success = False
+                context['execute_success'] = False
                 context['failed_reason'] = err.reason
 
             if after_execute_contexts:
                 for after_execute_context in after_execute_contexts:
                     context.update(after_execute_context(*args, **kwargs))
 
-            operation_text = (success_text if success or fail_text is None else fail_text).format_map(context)
+            operation_text_formatter = success_text if context['execute_success'] or fail_text is None else fail_text
+            operation_text = operation_text_formatter.format_map(context)
             operation_log = OperationLog(operator, operation_text, category)
 
             writer.write(operation_log)
