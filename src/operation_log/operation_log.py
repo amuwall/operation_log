@@ -54,7 +54,7 @@ class OperationFailedError(Exception):
         self.reason = reason
 
 
-def add_operation_log(
+def record_operation_log(
         get_operator: typing.Callable[[...], Operator],
         success_text: str,
         fail_text: typing.Optional[str] = None,
