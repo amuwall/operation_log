@@ -49,9 +49,11 @@ class DefaultOperationLogWriter(OperationLogWriter):
 class OperationFailedError(Exception):
     """An error related to the operation failed"""
 
-    def __init__(self, reason: str):
+    def __init__(self, reason: str, execute_result: typing.Any = None):
         super().__init__(reason)
+
         self.reason = reason
+        self.execute_result = execute_result
 
 
 def record_operation_log(
@@ -79,10 +81,11 @@ def record_operation_log(
                 for before_execute_context in before_execute_contexts:
                     context.update(before_execute_context(*args, **kwargs))
 
-            result = None
             try:
-                result = await func(*args, **kwargs)
+                execute_result = await func(*args, **kwargs)
             except OperationFailedError as err:
+                execute_result = err.execute_result
+
                 context['execute_success'] = False
                 context['failed_reason'] = err.reason
 
@@ -96,7 +99,7 @@ def record_operation_log(
 
             writer.write(operation_log)
 
-            return result
+            return execute_result
 
         return wrapper
 
