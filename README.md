@@ -15,7 +15,7 @@ operation_log is used to record operation log for web api.
 1. install operation log
 
 ```shell
-pip install operation_log
+pip install operation-log 
 ```
 
 2. use record_operation_log decorator to wrap api function
