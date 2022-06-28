@@ -80,14 +80,16 @@ def record_operation_log(
         async def wrapper(*args, **kwargs) -> typing.Any:
             context = {
                 'execute_success': True,
-                'failed_reason': ''
+                'failed_reason': '',
+                'before_execute': {},
+                'after_execute': {},
             }
 
             operator = get_operator(*args, **kwargs)
 
             if before_execute_contexts:
                 for before_execute_context in before_execute_contexts:
-                    context.update(before_execute_context(*args, **kwargs))
+                    context['before_execute'].update(before_execute_context(*args, **kwargs))
 
             try:
                 execute_result = await func(*args, **kwargs)
@@ -99,7 +101,7 @@ def record_operation_log(
 
             if after_execute_contexts:
                 for after_execute_context in after_execute_contexts:
-                    context.update(after_execute_context(*args, **kwargs))
+                    context['after_execute'].update(after_execute_context(*args, **kwargs))
 
             operation_text_template = success_text_template if context['execute_success'] else failed_text_template
             operation_text = operation_text_template.render(context)

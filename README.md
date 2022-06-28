@@ -46,16 +46,16 @@ def get_operator() -> Operator:
 
 
 def before_execute_context() -> typing.Dict:
-    return {'old_msg': 'hello old world'}
+    return {'msg': 'hello old world'}
 
 
 def after_execute_context() -> typing.Dict:
-    return {'new_msg': 'hello new world'}
+    return {'msg': 'hello new world'}
 
 
 @record_operation_log(
     get_operator,
-    'hello {{ old_msg }} {{ new_msg }}',
+    'hello {{ before_execute.msg }} {{ after_execute.msg }}',
     before_execute_contexts=[before_execute_context],
     after_execute_contexts=[after_execute_context]
 )

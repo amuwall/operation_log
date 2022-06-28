@@ -126,14 +126,14 @@ class RecordOperationLogTestCase(unittest.IsolatedAsyncioTestCase):
 
     async def test_record_success_log_with_context(self):
         def before_execute_context() -> typing.Dict:
-            return {'old_msg': 'hello old world'}
+            return {'msg': 'hello old world'}
 
         def after_execute_context() -> typing.Dict:
-            return {'new_msg': 'hello new world'}
+            return {'msg': 'hello new world'}
 
         @record_operation_log(
             self.get_test_operator,
-            'test op {{ old_msg }} {{ new_msg }}',
+            'test op {{ before_execute.msg }} {{ after_execute.msg }}',
             before_execute_contexts=[before_execute_context],
             after_execute_contexts=[after_execute_context]
         )
@@ -184,15 +184,15 @@ class RecordOperationLogTestCase(unittest.IsolatedAsyncioTestCase):
 
     async def test_record_failed_log_with_context(self):
         def before_execute_context() -> typing.Dict:
-            return {'old_msg': 'hello old world'}
+            return {'msg': 'hello old world'}
 
         def after_execute_context() -> typing.Dict:
-            return {'new_msg': 'hello new world'}
+            return {'msg': 'hello new world'}
 
         @record_operation_log(
             self.get_test_operator,
-            'test op {{ old_msg }} {{ new_msg }}',
-            failed_text='test failed op {{ old_msg }} {{ new_msg }} {{ failed_reason }}',
+            'test op {{ before_execute.msg }} {{ after_execute.msg }}',
+            failed_text='test failed op {{ before_execute.msg }} {{ after_execute.msg }} {{ failed_reason }}',
             before_execute_contexts=[before_execute_context],
             after_execute_contexts=[after_execute_context]
         )
