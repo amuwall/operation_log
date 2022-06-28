@@ -45,11 +45,11 @@ def get_operator() -> Operator:
     return Operator(1, 'test_user')
 
 
-def before_execute_context() -> typing.Dict:
+def before_execute_context(request) -> typing.Dict:
     return {'msg': 'hello old world'}
 
 
-def after_execute_context() -> typing.Dict:
+def after_execute_context(request) -> typing.Dict:
     return {'msg': 'hello new world'}
 
 
