@@ -55,7 +55,7 @@ def after_execute_context() -> typing.Dict:
 
 @record_operation_log(
     get_operator,
-    'hello {old_msg} {new_msg}',
+    'hello {{ old_msg }} {{ new_msg }}',
     before_execute_contexts=[before_execute_context],
     after_execute_contexts=[after_execute_context]
 )

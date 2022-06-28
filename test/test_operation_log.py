@@ -133,7 +133,7 @@ class RecordOperationLogTestCase(unittest.IsolatedAsyncioTestCase):
 
         @record_operation_log(
             self.get_test_operator,
-            'test op {old_msg} {new_msg}',
+            'test op {{ old_msg }} {{ new_msg }}',
             before_execute_contexts=[before_execute_context],
             after_execute_contexts=[after_execute_context]
         )
@@ -159,7 +159,7 @@ class RecordOperationLogTestCase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_record_failed_log(self):
-        @record_operation_log(self.get_test_operator, 'test success op', fail_text='test failed op')
+        @record_operation_log(self.get_test_operator, 'test success op', failed_text='test failed op')
         async def test_func():
             logging.info('test_record_failed_log')
             raise OperationFailedError('test failed reason')
@@ -191,8 +191,8 @@ class RecordOperationLogTestCase(unittest.IsolatedAsyncioTestCase):
 
         @record_operation_log(
             self.get_test_operator,
-            'test op {old_msg} {new_msg}',
-            fail_text='test failed op {old_msg} {new_msg} {failed_reason}',
+            'test op {{ old_msg }} {{ new_msg }}',
+            failed_text='test failed op {{ old_msg }} {{ new_msg }} {{ failed_reason }}',
             before_execute_contexts=[before_execute_context],
             after_execute_contexts=[after_execute_context]
         )
