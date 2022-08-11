@@ -9,10 +9,11 @@ from jinja2 import Environment, BaseLoader
 
 
 class Operator:
-    def __init__(self, operator_id: int, operator_name: str, operator_ip: typing.Optional[str] = None):
+    def __init__(self, operator_id: int, operator_name: str, operator_ip: typing.Optional[str] = None, **kwargs):
         self.id: int = operator_id
         self.name: str = operator_name
         self.ip: str = operator_ip if operator_ip else ''
+        self.extra: dict = kwargs
 
         if self.ip:
             # Check self.operator_ip is an ip str
